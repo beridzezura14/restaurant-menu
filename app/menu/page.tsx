@@ -45,12 +45,11 @@ function MenuSkeleton() {
 }
 
 export default function FullMenuPage() {
-  const { addItem } = useCart();
+  const { items, addItem, removeItem } = useCart();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [highlightedProduct, setHighlightedProduct] = useState<string>('');
-  const [addedProductId, setAddedProductId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [mobileColumns, setMobileColumns] = useState<1 | 2>(2);
   const observer = useRef<IntersectionObserver | null>(null);
@@ -130,10 +129,6 @@ export default function FullMenuPage() {
       image_url: product.image_url || '/placeholder-food.png',
     });
 
-    setAddedProductId(product.id);
-    window.setTimeout(() => {
-      setAddedProductId((current) => current === product.id ? '' : current);
-    }, 1200);
   };
 
   // 3. Deep Linking - სხვა გვერდიდან (მაგ. მთავარიდან) გადმოსვლისას სქროლი
@@ -387,7 +382,10 @@ export default function FullMenuPage() {
                 mobileColumns === 1 ? 'grid-cols-1' : 'grid-cols-2'
               }`}>
                 {category.products && category.products.length > 0 ? (
-                  category.products.map((product) => (
+                  category.products.map((product) => {
+                    const cartItem = items.find((item) => item.id === product.id);
+
+                    return (
                     <div 
                       key={product.id} 
                       id={`product-${product.id}`}
@@ -428,27 +426,43 @@ export default function FullMenuPage() {
                             {product.description}
                           </p>
                         </div>
-                        
-                        {/* დამატების ღილაკი */}
-                        <button
+
+                        {cartItem ? (
+                          <div className="mt-4 flex h-10 w-full items-center justify-between rounded-full bg-zinc-100 p-1 md:h-11">
+                            <button
+                              type="button"
+                              onClick={() => removeItem(product.id)}
+                              className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-base font-black text-zinc-700 shadow-sm transition hover:bg-zinc-200 md:h-9 md:w-9"
+                              aria-label={`${product.name} რაოდენობის შემცირება`}
+                            >
+                              -
+                            </button>
+                            <span className="min-w-8 text-center text-sm font-black text-zinc-900 md:text-base">
+                              {cartItem.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleAddToCart(product)}
+                              className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900 text-base font-black text-white shadow-sm transition hover:bg-emerald-600 md:h-9 md:w-9"
+                              aria-label={`${product.name} რაოდენობის გაზრდა`}
+                            >
+                              +
+                            </button>
+                          </div>
+                        ) : (
+                          <button
                           type="button"
                           onClick={() => handleAddToCart(product)}
-                          className={`self-end mt-4 text-white w-9 h-9 md:w-11 md:h-11 rounded-full flex items-center justify-center hover:scale-110 transition-all shadow-md active:scale-95 group/btn ${
-                            addedProductId === product.id ? 'bg-emerald-600' : 'bg-zinc-900 hover:bg-emerald-600'
-                          }`}
+                          className="mt-4 flex h-10 w-full items-center justify-center rounded-full bg-zinc-900 px-4 text-sm font-black text-white shadow-md transition hover:bg-emerald-600 active:scale-95 md:h-11"
                           aria-label={`${product.name} კალათაში დამატება`}
                         >
-                          {addedProductId === product.id ? (
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                            </svg>
-                          ) : (
-                            <span className="text-xl md:text-2xl leading-none group-hover/btn:rotate-90 transition-transform">+</span>
-                          )}
-                        </button>
+                          დამატება
+                          </button>
+                        )}
                       </div>
                     </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <p className="text-zinc-400 italic">ამ კატეგორიაში პროდუქტები ჯერ არ არის.</p>
                 )}
