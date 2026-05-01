@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useCart } from '../components/CartProvider';
@@ -46,6 +46,22 @@ function MenuSkeleton() {
 }
 
 export default function FullMenuPage() {
+  return (
+    <Suspense fallback={<FullMenuFallback />}>
+      <FullMenuContent />
+    </Suspense>
+  );
+}
+
+function FullMenuFallback() {
+  return (
+    <main className="min-h-screen bg-white py-16 md:py-20">
+      <MenuSkeleton />
+    </main>
+  );
+}
+
+function FullMenuContent() {
   const { items, addItem, removeItem } = useCart();
   const searchParams = useSearchParams();
   const querySearchTerm = searchParams.get('search') || '';
@@ -326,19 +342,8 @@ export default function FullMenuPage() {
           )}
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 pb-3 mt-2 flex items-center gap-2 md:mt-4 md:gap-3 md:pb-4">
-          <label className="relative block min-w-0 flex-1">
-            <span className="sr-only">პროდუქტის ძებნა</span>
-            <input
-              type="search"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="ძებნა..."
-              className="w-full h-10 rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 md:h-11"
-            />
-          </label>
-
-          <div className="grid w-20 flex-shrink-0 grid-cols-2 rounded-xl bg-zinc-100 p-1 md:hidden" aria-label="სვეტების რაოდენობა">
+        <div className="mx-auto flex max-w-7xl justify-end px-4 pb-3 mt-2 md:hidden">
+          <div className="grid w-20 flex-shrink-0 grid-cols-2 rounded-xl bg-zinc-100 p-1" aria-label="სვეტების რაოდენობა">
             {([1, 2] as const).map((count) => (
               <button
                 key={count}
