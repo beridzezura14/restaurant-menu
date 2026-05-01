@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useCart } from '../components/CartProvider';
 
@@ -46,17 +47,27 @@ function MenuSkeleton() {
 
 export default function FullMenuPage() {
   const { items, addItem, removeItem } = useCart();
+  const searchParams = useSearchParams();
+  const querySearchTerm = searchParams.get('search') || '';
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [highlightedProduct, setHighlightedProduct] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(querySearchTerm);
   const [mobileColumns, setMobileColumns] = useState<1 | 2>(2);
   const observer = useRef<IntersectionObserver | null>(null);
   const categoryNavRef = useRef<HTMLDivElement | null>(null);
   const menuResultsRef = useRef<HTMLDivElement | null>(null);
   const didMountSearchRef = useRef(false);
   const categoryButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setSearchTerm(querySearchTerm);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [querySearchTerm]);
 
   // 1. მონაცემების წამოღება Supabase-დან
   useEffect(() => {

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCart } from './CartProvider';
 
 function CartNavLabel() {
@@ -19,8 +20,42 @@ function CartNavLabel() {
   );
 }
 
+function SearchIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
+    </svg>
+  );
+}
+
+function HeaderSearch({ onSearch, compact = false }: { onSearch?: () => void; compact?: boolean }) {
+  const router = useRouter();
+  const [term, setTerm] = useState('');
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const value = term.trim();
+    router.push(value ? `/menu?search=${encodeURIComponent(value)}` : '/menu');
+    onSearch?.();
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className={`relative ${compact ? 'w-full' : 'w-64 lg:w-80'}`}>
+      <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+      <input
+        type="search"
+        value={term}
+        onChange={(event) => setTerm(event.target.value)}
+        placeholder="ძებნა..."
+        className="h-10 w-full rounded-full border border-zinc-200 bg-zinc-50 pl-9 pr-4 text-sm font-medium text-zinc-900 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+      />
+    </form>
+  );
+}
+
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
     <header className="fixed top-0 z-50 w-full border-b border-zinc-100 bg-white/90 backdrop-blur-md">
@@ -32,7 +67,8 @@ export default function Header() {
             </Link>
           </div>
 
-          <nav className="hidden items-center space-x-8 md:flex">
+          <nav className="hidden items-center gap-6 md:flex">
+            <HeaderSearch />
             <Link href="/contact" className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900">
               კონტაქტი
             </Link>
@@ -47,10 +83,24 @@ export default function Header() {
             </Link>
           </nav>
 
-          <div className="flex items-center md:hidden">
+          <div className="flex items-center gap-1 md:hidden">
             <button
               type="button"
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => {
+                setIsSearchOpen((current) => !current);
+                setIsOpen(false);
+              }}
+              className="p-2 text-zinc-900 focus:outline-none"
+              aria-label="ძებნის გახსნა"
+            >
+              <SearchIcon className="h-6 w-6" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(!isOpen);
+                setIsSearchOpen(false);
+              }}
               className="p-2 text-zinc-900 focus:outline-none"
               aria-label="მენიუს გახსნა"
             >
@@ -65,6 +115,12 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      {isSearchOpen && (
+        <div className="border-t border-zinc-50 bg-white px-4 py-3 shadow-xl md:hidden">
+          <HeaderSearch compact onSearch={() => setIsSearchOpen(false)} />
+        </div>
+      )}
 
       {isOpen && (
         <div className="border-t border-zinc-50 bg-white shadow-xl md:hidden">

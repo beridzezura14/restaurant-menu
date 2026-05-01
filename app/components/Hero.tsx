@@ -54,53 +54,50 @@ export default function Hero() {
   const productHref = dailyProduct ? `/menu#product-${dailyProduct.id}` : '/menu';
 
   return (
-    <section ref={containerRef} className="relative min-h-[90vh] flex items-center bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="flex flex-col justify-center text-center lg:text-left order-2 lg:order-1">
-            <div className="animate-item inline-flex items-center justify-center lg:justify-start gap-2 mb-6">
-              <span className="w-12 h-[1px] bg-emerald-600" />
+    <section ref={containerRef} className="relative overflow-hidden bg-white py-5 md:py-8">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid items-center gap-5 rounded-[1.75rem] bg-zinc-50 p-4 shadow-sm ring-1 ring-zinc-100 md:grid-cols-[1fr_260px] md:p-6 lg:grid-cols-[1fr_340px]">
+          <div className="flex flex-col justify-center text-center md:text-left">
+            <div className="animate-item mb-3 inline-flex items-center justify-center gap-2 md:justify-start">
+              <span className="h-[1px] w-8 bg-emerald-600" />
               <span className="text-emerald-600 font-bold tracking-widest text-xs uppercase">
                 დღის შეთავაზება
               </span>
             </div>
 
-            <h1 className="animate-item text-4xl md:text-6xl lg:text-7xl font-black text-zinc-900 leading-[1.1] mb-6">
+            <h1 className="animate-item mb-3 text-3xl font-black leading-[1.05] text-zinc-900 md:text-4xl lg:text-5xl">
               {loadingProduct ? 'იტვირთება' : dailyProduct?.name || 'მენიუ'}
-              <br />
               {/* <span className="text-emerald-600 italic font-serif">
                 რჩეული პროდუქტი
               </span> */}
             </h1>
 
-            <p className="animate-item text-zinc-500 text-lg md:text-xl max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed">
+            <p className="animate-item mx-auto mb-5 max-w-2xl text-sm leading-relaxed text-zinc-500 md:mx-0 md:text-base">
               {loadingProduct
                 ? 'დღის შეთავაზება იტვირთება...'
                 : dailyProduct?.description || 'აღმოაჩინე ჩვენი დღევანდელი რჩეული პროდუქტი.'}
             </p>
 
-            <div className="animate-item flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+            <div className="animate-item flex flex-col items-center gap-3 sm:flex-row md:justify-start">
               <Link
                 href={productHref}
-                className="w-full sm:w-auto px-10 py-4 bg-zinc-900 text-white rounded-full font-bold hover:bg-emerald-600 transition-all duration-300 text-center"
+                className="w-full rounded-full bg-zinc-900 px-7 py-3 text-center text-sm font-bold text-white transition-all duration-300 hover:bg-emerald-600 sm:w-auto"
               >
                 {dailyProduct ? `შეუკვეთე - ${dailyProduct.price} ₾` : 'ნახე მენიუ'}
               </Link>
               <Link
                 href="/menu"
-                className="w-full sm:w-auto px-10 py-4 border border-zinc-200 text-zinc-900 rounded-full font-bold hover:bg-zinc-50 transition-all text-center"
+                className="w-full rounded-full border border-zinc-200 bg-white px-7 py-3 text-center text-sm font-bold text-zinc-900 transition-all hover:bg-zinc-50 sm:w-auto"
               >
                 სრული მენიუ
               </Link>
             </div>
           </div>
 
-          <div className="animate-item relative flex justify-center lg:justify-end order-1 lg:order-2">
-            <div className="absolute top-1/2 left-1/2 lg:left-3/4 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-100/50 rounded-full blur-[80px] -z-10" />
-
+          <div className="animate-item relative flex justify-center md:justify-end">
             <Link
               href={productHref}
-              className="relative w-[280px] h-[280px] sm:w-[400px] sm:h-[400px] lg:w-[500px] lg:h-[500px] overflow-hidden rounded-[2rem] bg-zinc-100 shadow-2xl shadow-zinc-200/70"
+              className="relative h-[180px] w-full max-w-[260px] overflow-hidden rounded-[1.35rem] bg-zinc-100 shadow-xl shadow-zinc-200/70 md:h-[220px] md:max-w-none lg:h-[260px]"
             >
               {loadingProduct ? (
                 <div className="w-full h-full animate-pulse bg-zinc-200" />
@@ -110,7 +107,7 @@ export default function Hero() {
                   alt={dailyProduct?.name || 'დღის შეთავაზება'}
                   fill
                   className="object-cover hover:scale-105 transition-transform duration-700"
-                  sizes="(max-width: 640px) 280px, (max-width: 1024px) 400px, 500px"
+                  sizes="(max-width: 768px) 260px, (max-width: 1024px) 260px, 340px"
                   priority
                 />
               )}

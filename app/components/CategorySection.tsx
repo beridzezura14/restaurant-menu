@@ -31,12 +31,12 @@ export default function CategorySection() {
   // --- Skeleton Loading View ---
   if (loading) {
     return (
-      <section className="py-16 px-4 max-w-7xl mx-auto">
-        <div className="flex flex-col items-center mb-12">
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+        <div className="flex flex-col items-center mb-8 md:mb-10">
           <div className="h-10 w-40 bg-zinc-100 rounded-md animate-pulse mb-2"></div>
           <div className="h-1.5 w-20 bg-zinc-100 rounded-full animate-pulse"></div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4 lg:gap-8">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="space-y-4">
               <div className="aspect-square bg-zinc-100 rounded-[2.5rem] animate-pulse" />
@@ -49,13 +49,13 @@ export default function CategorySection() {
   }
 
   return (
-    <section className="py-16 px-4 max-w-7xl mx-auto">
-      <div className="flex flex-col items-center mb-12">
+    <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+      <div className="flex flex-col items-center mb-8 md:mb-10">
         <h2 className="text-4xl font-black text-zinc-900 mb-2 uppercase italic tracking-tighter">მენიუ</h2>
         <div className="h-1.5 w-20 bg-emerald-500 rounded-full"></div>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4 lg:gap-8">
         {categories.map((category) => (
           <Link 
             href={`/menu#${category.id}`} 
