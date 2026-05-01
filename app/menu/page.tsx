@@ -279,24 +279,13 @@ export default function FullMenuPage() {
   }, [loading, normalizedSearch, visibleCategories]);
 
   return (
-    <main className="min-h-screen bg-white py-20">
-      <span
-        className="hidden"
-        aria-hidden="true"
-        aria-label="მთავარ გვერდზე დაბრუნება"
-        title="მთავარ გვერდზე დაბრუნება"
-      >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </span>
-
+    <main className="min-h-screen bg-white py-16 md:py-20">
       {/* მთავარი სათაური */}
-      <div className="bg-zinc-900 py-24 px-4 text-center">
-        <h1 className="text-4xl md:text-7xl font-black text-white uppercase italic tracking-tighter">
+      <div className="bg-zinc-900 py-14 px-4 text-center md:py-24">
+        <h1 className="text-3xl md:text-7xl font-black text-white uppercase italic tracking-tighter">
           ჩვენი მენიუ
         </h1>
-        <p className="text-zinc-400 mt-4 max-w-md mx-auto text-sm md:text-base font-medium">
+        <p className="text-zinc-400 mt-3 max-w-md mx-auto text-xs md:mt-4 md:text-base font-medium">
           აღმოაჩინე საუკეთესო გემოები, დამზადებული ნატურალური პროდუქტებით
         </p>
       </div>
@@ -305,18 +294,8 @@ export default function FullMenuPage() {
       <div className="sticky top-16 md:top-20 z-40 bg-white/90 backdrop-blur-xl border-b border-zinc-100 shadow-sm">
         <div
           ref={categoryNavRef}
-          className="max-w-7xl mx-auto px-4 flex gap-3 py-4 overflow-x-auto no-scrollbar scroll-smooth"
+          className="max-w-7xl mx-auto px-4 flex gap-2 py-3 overflow-x-auto no-scrollbar scroll-smooth md:gap-3 md:py-4"
         >
-          <span
-            className="hidden"
-            aria-hidden="true"
-            aria-label="მთავარ გვერდზე დაბრუნება"
-            title="მთავარ გვერდზე დაბრუნება"
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </span>
           {loading ? (
             [1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="h-10 w-28 bg-zinc-100 rounded-full animate-pulse flex-shrink-0" />
@@ -329,7 +308,7 @@ export default function FullMenuPage() {
                   categoryButtonRefs.current[cat.id] = element;
                 }}
                 onClick={() => scrollToCategory(cat.id)}
-                className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 whitespace-nowrap ${
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 whitespace-nowrap md:px-6 md:py-2.5 md:text-sm ${
                   activeCategory === cat.id 
                   ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 scale-105' 
                   : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-800'
@@ -341,7 +320,7 @@ export default function FullMenuPage() {
           )}
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 pb-4 mt-4 flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-4 pb-3 mt-2 flex items-center gap-2 md:mt-4 md:gap-3 md:pb-4">
           <label className="relative block min-w-0 flex-1">
             <span className="sr-only">პროდუქტის ძებნა</span>
             <input
@@ -349,11 +328,11 @@ export default function FullMenuPage() {
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="ძებნა..."
-              className="w-full h-11 rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full h-10 rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 md:h-11"
             />
           </label>
 
-          <div className="grid w-24 flex-shrink-0 grid-cols-2 rounded-xl bg-zinc-100 p-1 md:hidden" aria-label="სვეტების რაოდენობა">
+          <div className="grid w-20 flex-shrink-0 grid-cols-2 rounded-xl bg-zinc-100 p-1 md:hidden" aria-label="სვეტების რაოდენობა">
             {([1, 2] as const).map((count) => (
               <button
                 key={count}
@@ -361,19 +340,19 @@ export default function FullMenuPage() {
                 onClick={() => setMobileColumns(count)}
                 aria-label={count === 1 ? 'ერთი სვეტი' : 'ორი სვეტი'}
                 title={count === 1 ? 'ერთი სვეტი' : 'ორი სვეტი'}
-                className={`h-9 rounded-lg text-sm font-bold transition ${
+                className={`h-8 rounded-lg text-sm font-bold transition ${
                   mobileColumns === count
                     ? 'bg-zinc-900 text-white shadow-sm'
                     : 'text-zinc-500'
                 }`}
               >
                 {count === 1 ? (
-                  <svg className="mx-auto h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <svg className="mx-auto h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                     <rect x="5" y="6" width="14" height="4" rx="1.5" strokeWidth="2" />
                     <rect x="5" y="14" width="14" height="4" rx="1.5" strokeWidth="2" />
                   </svg>
                 ) : (
-                  <svg className="mx-auto h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <svg className="mx-auto h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                     <rect x="4" y="5" width="6" height="6" rx="1.5" strokeWidth="2" />
                     <rect x="14" y="5" width="6" height="6" rx="1.5" strokeWidth="2" />
                     <rect x="4" y="15" width="6" height="4" rx="1.5" strokeWidth="2" />
@@ -390,15 +369,15 @@ export default function FullMenuPage() {
       {loading ? (
         <MenuSkeleton />
       ) : (
-        <div ref={menuResultsRef} className="max-w-7xl mx-auto px-4 py-16 flex flex-col gap-14">
+        <div ref={menuResultsRef} className="max-w-7xl mx-auto px-4 py-10 pb-24 flex flex-col gap-10 md:py-16 md:gap-14">
           {visibleCategories.length > 0 ? visibleCategories.map((category) => (
             <section 
               key={category.id} 
               id={category.id} 
               className="scroll-mt-40 transition-opacity duration-500"
             >
-              <div className="flex items-center gap-4 mb-12">
-                <h2 className="text-3xl md:text-4xl font-black text-zinc-900 uppercase italic tracking-tight">
+              <div className="flex items-center gap-3 mb-6 md:gap-4 md:mb-12">
+                <h2 className="text-2xl md:text-4xl font-black text-zinc-900 uppercase italic tracking-tight">
                   {category.name}
                 </h2>
                 <div className="h-[2px] flex-1 bg-gradient-to-r from-zinc-200 to-transparent"></div>
@@ -484,7 +463,7 @@ export default function FullMenuPage() {
       )}
 
       {/* Footer-თან დაშორება */}
-      <div className="h-20"></div>
+      <div className="h-24 md:h-20"></div>
     </main>
   );
 }

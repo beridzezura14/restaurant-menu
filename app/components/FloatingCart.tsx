@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useCart } from './CartProvider';
 
@@ -17,12 +17,37 @@ export default function FloatingCart() {
   const { items, totalItems, totalPrice, addItem, removeItem, deleteItem, clearCart } = useCart();
   const [isOpen, setIsOpen] = useState(false);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const scrollY = window.scrollY;
+    const originalBodyStyle = {
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      top: document.body.style.top,
+      width: document.body.style.width,
+    };
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+
+    return () => {
+      document.body.style.overflow = originalBodyStyle.overflow;
+      document.body.style.position = originalBodyStyle.position;
+      document.body.style.top = originalBodyStyle.top;
+      document.body.style.width = originalBodyStyle.width;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen]);
+
   return (
     <>
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-5 right-5 z-[120] flex h-16 w-16 items-center justify-center rounded-full bg-zinc-900 text-white shadow-2xl shadow-zinc-400/40 transition hover:bg-emerald-600"
+        className="fixed bottom-4 right-4 z-[120] flex h-14 w-14 items-center justify-center rounded-full bg-zinc-900 text-white shadow-2xl shadow-zinc-400/40 transition hover:bg-emerald-600 md:bottom-5 md:right-5 md:h-16 md:w-16"
         aria-label="კალათა"
       >
         <CartIcon />
@@ -34,9 +59,9 @@ export default function FloatingCart() {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-[130] bg-zinc-900/50 p-4 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
+        <div className="fixed inset-0 z-[130] bg-zinc-900/50 backdrop-blur-sm md:p-4" onClick={() => setIsOpen(false)}>
           <div
-            className="absolute bottom-24 right-5 w-[calc(100%-2.5rem)] max-w-md rounded-2xl bg-white p-5 shadow-2xl"
+            className="fixed inset-x-0 bottom-0 max-h-[85dvh] overflow-hidden rounded-t-3xl bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl md:absolute md:inset-x-auto md:bottom-24 md:right-5 md:w-[calc(100%-2.5rem)] md:max-w-md md:rounded-2xl md:p-5"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
@@ -50,10 +75,10 @@ export default function FloatingCart() {
 
             {items.length > 0 ? (
               <>
-                <div className="max-h-[420px] space-y-3 overflow-y-auto pr-1">
+                <div className="max-h-[52dvh] space-y-3 overflow-y-auto pr-1 md:max-h-[420px]">
                   {items.map((item) => (
                     <div key={item.id} className="flex gap-3 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm">
-                      <img src={item.image_url || '/placeholder-food.png'} alt={item.name} className="h-20 w-20 flex-shrink-0 rounded-xl object-cover" />
+                      <img src={item.image_url || '/placeholder-food.png'} alt={item.name} className="h-16 w-16 flex-shrink-0 rounded-xl object-cover sm:h-20 sm:w-20" />
                       <div className="flex min-w-0 flex-1 flex-col justify-between">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
@@ -97,7 +122,7 @@ export default function FloatingCart() {
                               +
                             </button>
                           </div>
-                          <span className="text-sm font-black text-zinc-900">
+                          <span className="text-xs font-black text-zinc-900 sm:text-sm">
                             {(item.price * item.quantity).toFixed(2)} ₾
                           </span>
                         </div>
@@ -106,12 +131,12 @@ export default function FloatingCart() {
                   ))}
                 </div>
 
-                <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-4">
+                <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-4">
                   <span className="text-sm font-bold text-zinc-500">ჯამი</span>
                   <span className="text-xl font-black text-zinc-900">{totalPrice.toFixed(2)} ₾</span>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3">
                   <Link
                     href="/cart"
                     onClick={() => setIsOpen(false)}
