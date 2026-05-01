@@ -50,6 +50,7 @@ export default function FullMenuPage() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [highlightedProduct, setHighlightedProduct] = useState<string>('');
+  const [addedProductId, setAddedProductId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [mobileColumns, setMobileColumns] = useState<1 | 2>(2);
   const observer = useRef<IntersectionObserver | null>(null);
@@ -120,6 +121,20 @@ export default function FullMenuPage() {
       }, 2200);
     }
   }, [categories, scrollToElement]);
+
+  const handleAddToCart = (product: Product) => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image_url: product.image_url || '/placeholder-food.png',
+    });
+
+    setAddedProductId(product.id);
+    window.setTimeout(() => {
+      setAddedProductId((current) => current === product.id ? '' : current);
+    }, 1200);
+  };
 
   // 3. Deep Linking - სხვა გვერდიდან (მაგ. მთავარიდან) გადმოსვლისას სქროლი
   useEffect(() => {
@@ -287,7 +302,7 @@ export default function FullMenuPage() {
       </div>
 
       {/* STICKY NAVIGATION - მენიუს კატეგორიები */}
-      <div className="sticky top-20 z-40 bg-white/90 backdrop-blur-xl border-b border-zinc-100 shadow-sm">
+      <div className="sticky top-16 md:top-20 z-40 bg-white/90 backdrop-blur-xl border-b border-zinc-100 shadow-sm">
         <div
           ref={categoryNavRef}
           className="max-w-7xl mx-auto px-4 flex gap-3 py-4 overflow-x-auto no-scrollbar scroll-smooth"
@@ -438,16 +453,19 @@ export default function FullMenuPage() {
                         {/* დამატების ღილაკი */}
                         <button
                           type="button"
-                          onClick={() => addItem({
-                            id: product.id,
-                            name: product.name,
-                            price: product.price,
-                            image_url: product.image_url || '/placeholder-food.png',
-                          })}
-                          className="self-end mt-4 bg-zinc-900 text-white w-9 h-9 md:w-11 md:h-11 rounded-full flex items-center justify-center hover:bg-emerald-600 hover:scale-110 transition-all shadow-md active:scale-95 group/btn"
+                          onClick={() => handleAddToCart(product)}
+                          className={`self-end mt-4 text-white w-9 h-9 md:w-11 md:h-11 rounded-full flex items-center justify-center hover:scale-110 transition-all shadow-md active:scale-95 group/btn ${
+                            addedProductId === product.id ? 'bg-emerald-600' : 'bg-zinc-900 hover:bg-emerald-600'
+                          }`}
                           aria-label={`${product.name} კალათაში დამატება`}
                         >
-                           <span className="text-xl md:text-2xl leading-none group-hover/btn:rotate-90 transition-transform">+</span>
+                          {addedProductId === product.id ? (
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            <span className="text-xl md:text-2xl leading-none group-hover/btn:rotate-90 transition-transform">+</span>
+                          )}
                         </button>
                       </div>
                     </div>
