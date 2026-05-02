@@ -47,8 +47,15 @@ function HeaderSearch({ onSearch, compact = false }: { onSearch?: () => void; co
         value={term}
         onChange={(event) => setTerm(event.target.value)}
         placeholder="ძებნა..."
-        className="h-10 w-full rounded-full border border-zinc-200 bg-zinc-50 pl-9 pr-4 text-sm font-medium text-zinc-900 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+        className="h-10 w-full rounded-full border border-zinc-200 bg-zinc-50 pl-9 pr-24 text-sm font-medium text-zinc-900 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100"
       />
+      <button
+        type="submit"
+        className="absolute right-1 top-1/2 h-8 -translate-y-1/2 rounded-full bg-zinc-900 px-4 text-xs font-bold text-white transition-colors hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+        aria-label="ძებნა"
+      >
+        ძებნა
+      </button>
     </form>
   );
 }
