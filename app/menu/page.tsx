@@ -1,6 +1,6 @@
 "use client";
 import { Suspense, useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useCart } from '../components/CartProvider';
 
@@ -63,6 +63,7 @@ function FullMenuFallback() {
 
 function FullMenuContent() {
   const { items, addItem, removeItem } = useCart();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const querySearchTerm = searchParams.get('search') || '';
   const [categories, setCategories] = useState<Category[]>([]);
@@ -75,7 +76,16 @@ function FullMenuContent() {
   const categoryNavRef = useRef<HTMLDivElement | null>(null);
   const menuResultsRef = useRef<HTMLDivElement | null>(null);
   const didMountSearchRef = useRef(false);
+  const pendingCategoryAfterSearchClearRef = useRef<string | null>(null);
+  const programmaticCategoryScrollRef = useRef<string | null>(null);
+  const programmaticCategoryScrollTimerRef = useRef<number | null>(null);
   const categoryButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  useEffect(() => () => {
+    if (programmaticCategoryScrollTimerRef.current) {
+      window.clearTimeout(programmaticCategoryScrollTimerRef.current);
+    }
+  }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -127,11 +137,27 @@ function FullMenuContent() {
     return false;
   }, []);
 
+  const lockActiveCategoryDuringScroll = useCallback((id: string) => {
+    programmaticCategoryScrollRef.current = id;
+
+    if (programmaticCategoryScrollTimerRef.current) {
+      window.clearTimeout(programmaticCategoryScrollTimerRef.current);
+    }
+
+    programmaticCategoryScrollTimerRef.current = window.setTimeout(() => {
+      programmaticCategoryScrollRef.current = null;
+      programmaticCategoryScrollTimerRef.current = null;
+    }, 900);
+  }, []);
+
   const scrollToCategory = useCallback((id: string, behavior: ScrollBehavior = 'smooth') => {
     if (scrollToElement(id, behavior)) {
+      if (behavior === 'smooth') {
+        lockActiveCategoryDuringScroll(id);
+      }
       setActiveCategory(id);
     }
-  }, [scrollToElement]);
+  }, [lockActiveCategoryDuringScroll, scrollToElement]);
 
   const scrollToProduct = useCallback((productId: string, behavior: ScrollBehavior = 'smooth') => {
     const productCategory = categories.find((category) =>
@@ -139,14 +165,19 @@ function FullMenuContent() {
     );
 
     if (scrollToElement(`product-${productId}`, behavior)) {
-      if (productCategory) setActiveCategory(productCategory.id);
+      if (productCategory) {
+        if (behavior === 'smooth') {
+          lockActiveCategoryDuringScroll(productCategory.id);
+        }
+        setActiveCategory(productCategory.id);
+      }
       setHighlightedProduct(productId);
 
       window.setTimeout(() => {
         setHighlightedProduct((current) => current === productId ? '' : current);
       }, 2200);
     }
-  }, [categories, scrollToElement]);
+  }, [categories, lockActiveCategoryDuringScroll, scrollToElement]);
 
   const handleAddToCart = (product: Product) => {
     addItem({
@@ -196,6 +227,37 @@ function FullMenuContent() {
       : categories
   ), [categories, normalizedSearch]);
 
+  const clearSearch = useCallback(() => {
+    pendingCategoryAfterSearchClearRef.current = null;
+    setSearchTerm('');
+    router.replace('/menu', { scroll: false });
+  }, [router]);
+
+  const handleCategorySelect = useCallback((id: string) => {
+    if (normalizedSearch) {
+      pendingCategoryAfterSearchClearRef.current = id;
+      setSearchTerm('');
+      router.replace('/menu', { scroll: false });
+      return;
+    }
+
+    scrollToCategory(id);
+  }, [normalizedSearch, router, scrollToCategory]);
+
+  useEffect(() => {
+    if (loading || normalizedSearch || visibleCategories.length === 0) return;
+
+    const pendingCategory = pendingCategoryAfterSearchClearRef.current;
+    if (!pendingCategory) return;
+
+    pendingCategoryAfterSearchClearRef.current = null;
+    const timer = window.setTimeout(() => {
+      scrollToCategory(pendingCategory);
+    }, 80);
+
+    return () => window.clearTimeout(timer);
+  }, [loading, normalizedSearch, scrollToCategory, visibleCategories]);
+
   useEffect(() => {
     if (loading || visibleCategories.length === 0) return;
 
@@ -220,6 +282,24 @@ function FullMenuContent() {
 
     const updateActiveCategory = () => {
       const activationLine = window.innerWidth < 768 ? 190 : 170;
+      const lockedCategory = programmaticCategoryScrollRef.current;
+
+      if (lockedCategory) {
+        const lockedSection = document.getElementById(lockedCategory);
+        const lockedSectionTop = lockedSection?.getBoundingClientRect().top;
+
+        if (typeof lockedSectionTop === 'number' && lockedSectionTop <= activationLine && lockedSectionTop >= 80) {
+          programmaticCategoryScrollRef.current = null;
+          if (programmaticCategoryScrollTimerRef.current) {
+            window.clearTimeout(programmaticCategoryScrollTimerRef.current);
+            programmaticCategoryScrollTimerRef.current = null;
+          }
+        } else {
+          setActiveCategory(lockedCategory);
+          return;
+        }
+      }
+
       const sections = visibleCategories
         .map((category) => document.getElementById(category.id))
         .filter((section): section is HTMLElement => Boolean(section));
@@ -262,11 +342,17 @@ function FullMenuContent() {
 
     const navRect = nav.getBoundingClientRect();
     const buttonRect = activeButton.getBoundingClientRect();
-    const targetLeft = nav.scrollLeft + buttonRect.left - navRect.left - (navRect.width - buttonRect.width) / 2;
+    const safeInset = 16;
+    const isButtonFullyVisible = buttonRect.left >= navRect.left + safeInset && buttonRect.right <= navRect.right - safeInset;
+    if (isButtonFullyVisible) return;
+
+    const targetLeft = buttonRect.left < navRect.left + safeInset
+      ? nav.scrollLeft + buttonRect.left - navRect.left - safeInset
+      : nav.scrollLeft + buttonRect.right - navRect.right + safeInset;
 
     nav.scrollTo({
-      left: targetLeft,
-      behavior: 'smooth',
+      left: Math.max(targetLeft, 0),
+      behavior: 'auto',
     });
   }, [activeCategory]);
 
@@ -316,7 +402,7 @@ function FullMenuContent() {
       <div className="sticky top-16 md:top-20 z-40 bg-white/90 backdrop-blur-xl border-b border-zinc-100 shadow-sm">
         <div
           ref={categoryNavRef}
-          className="max-w-7xl mx-auto px-4 flex gap-2 py-3 overflow-x-auto no-scrollbar scroll-smooth md:gap-3 md:py-4"
+          className="max-w-7xl mx-auto px-4 flex gap-2 py-3 overflow-x-auto no-scrollbar md:gap-3 md:py-4"
         >
           {loading ? (
             [1, 2, 3, 4, 5].map((i) => (
@@ -329,10 +415,10 @@ function FullMenuContent() {
                 ref={(element) => {
                   categoryButtonRefs.current[cat.id] = element;
                 }}
-                onClick={() => scrollToCategory(cat.id)}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 whitespace-nowrap md:px-6 md:py-2.5 md:text-sm ${
+                onClick={() => handleCategorySelect(cat.id)}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-colors duration-200 whitespace-nowrap md:px-6 md:py-2.5 md:text-sm ${
                   activeCategory === cat.id 
-                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 scale-105' 
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-100' 
                   : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-800'
                 }`}
               >
@@ -381,6 +467,21 @@ function FullMenuContent() {
         <MenuSkeleton />
       ) : (
         <div ref={menuResultsRef} className="max-w-7xl mx-auto px-4 py-10 pb-24 flex flex-col gap-10 md:py-16 md:gap-14">
+          {normalizedSearch && (
+            <div className="flex flex-col gap-3 rounded-2xl bg-emerald-50 px-4 py-4 text-sm text-emerald-900 md:flex-row md:items-center md:justify-between md:px-6">
+              <span className="font-bold">
+                ძებნის შედეგები: &quot;{searchTerm.trim()}&quot;
+              </span>
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="w-fit rounded-full bg-white px-4 py-2 text-xs font-black text-emerald-700 shadow-sm transition hover:bg-emerald-600 hover:text-white"
+              >
+                ყველა პროდუქტის ჩვენება
+              </button>
+            </div>
+          )}
+
           {visibleCategories.length > 0 ? visibleCategories.map((category) => (
             <section 
               key={category.id} 
